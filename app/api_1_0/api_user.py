@@ -13,6 +13,24 @@ from app.api_1_0.api_auth import auth, generate_auth_token, verify_auth_token
 api_user = Api(api_1_0)
 
 
+class UserListApi(Resource):
+	@auth.login_required
+	def get(self):
+		try:
+			us = User.query.all()
+		except Exception as ex:
+			print("{} User query: failure...{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), ex))
+			return False
+		else:
+			print("{} User query: success...".format(time.strftime("%Y-%m-%d %H:%M:%S")))
+			ret = []
+			for it in us:
+				ret.append(it.to_json())
+			return jsonify(ret)
+		finally:
+			db.session.close()
+
+
 class UserAddApi(Resource):
 	@auth.login_required
 	def post(self):
@@ -64,4 +82,5 @@ class UserToken(Resource):
 api_user.add_resource(UserAddApi, '/useradd', endpoint='useradd')
 api_user.add_resource(UserVerifyApi, '/userverify', endpoint='userverify')
 api_user.add_resource(UserToken, '/usertoken', endpoint='usertoken')
+api_user.add_resource(UserListApi, '/userlist', endpoint='userlist')
 
