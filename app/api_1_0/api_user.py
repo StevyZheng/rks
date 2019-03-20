@@ -21,6 +21,7 @@ class UserListApi(Resource):
 	@auth.login_required
 	def get(self):
 		user_info = request.get_json()
+		print(user_info)
 		try:
 			args = user_parser.parse_args()
 			username_agr = args['username']

@@ -57,7 +57,7 @@ class Debug(object):
         :param ex: 异常变量
         :return: 返回要打印的异常字符串
         """
-		return "exception msg:{0}{1}{0}traceback:{0}{2}".format(os.linesep, Exception(ex).message,
+		return "exception msg:{0}{1}{0}traceback:{0}{2}".format(os.linesep, Exception(ex),
 		                                                        traceback.format_exc())
 
 

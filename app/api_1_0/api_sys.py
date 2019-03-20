@@ -12,8 +12,11 @@ from libs.sys import Sys
 class SysinfoApi(Resource):
 	@auth.login_required
 	def get(self):
-		return {
-			"cpu": Sys.get_cpu_info(),
-			"memory": Sys.get_mem_info()
-		}
+		try:
+			return {
+				"cpu": Sys.get_cpu_info(),
+				"memory": Sys.get_mem_info()
+			}
+		except Exception as ex:
+			print(ex)
 

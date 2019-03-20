@@ -37,7 +37,7 @@ class Sys(object):
 				if end_time <= datetime.datetime.now():
 					sub.kill()
 					return "TIME_OUT"
-		return str(sub.stdout.read())
+		return sub.stdout.read().decode('utf-8')
 	
 	@classmethod
 	def get_time(cls):
@@ -52,18 +52,18 @@ class Sys(object):
 		mem = psutil.virtual_memory()
 		
 		dmi_str = Sys.shell_exec_single("dmidecode -t memory")
-		t_list_mem_socket = TextOp.find_str(dmi_str, "P[1-9]-DIMM[A-Z]+[1-9]+$", False)
+		t_list_mem_socket = TextOp.find_str(dmi_str, "P[1-9]-DIMM[A-Z]+[1-9]+", False)
 		max_mem_size = TextOp.find_str_column(dmi_str, "Maximum Capacity.+", 1, ":")
-		t_list_mem_model = TextOp.find_str(dmi_str, "Part Number.{2}[^D].+", False)
+		t_list_mem_model = TextOp.find_str_column(dmi_str, "Part Number.{2}[^D].+", 1, ":", False)
 		mem_dict = {}
 		try:
 			mem_dict = {
-				"mem_socet_num": len(t_list_mem_socket),
+				"mem_socket_num": len(t_list_mem_socket),
 				"max_mem_size": max_mem_size[0],
 				"mem_model": t_list_mem_model[0],
-				"total": mem.total / memory_convent,
-				"available": mem.available / memory_convent,
-				"free": mem.free / memory_convent
+				"total": int(mem.total / memory_convent),
+				"available": int(mem.available / memory_convent),
+				"free": int(mem.free / memory_convent)
 			}
 		except Exception as ex:
 			print(Debug.get_except(ex))
