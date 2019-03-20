@@ -7,4 +7,4 @@ from flask import Blueprint
 api_1_0 = Blueprint('api_1_0', __name__, url_prefix='/api')
 
 
-from . import api_user, api_auth
+from . import api_user, api_auth, api_sys
