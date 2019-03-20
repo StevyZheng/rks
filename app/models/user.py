@@ -20,6 +20,14 @@ class User(db.Model):
 	# role = db.relationship('Role', backref=db.backref('users'), lazy='dynamic')
 	role = db.relationship('Role', backref=db.backref('users'), lazy='subquery')
 	
+	def __init__(self, username, password, role='normal'):
+		self.username = username
+		self.password = password
+		if role is not None:
+			self.role = Role.query.filter_by(rolename=role).first()
+		else:
+			self.role = Role.queryy.filter_by(rolename='normal').first()
+	
 	@property
 	def password(self):
 		raise AttributeError('password is not readable attribute')

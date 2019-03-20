@@ -53,17 +53,40 @@ class UserAddApi(Resource):
 	def post(self):
 		user_info = request.get_json()
 		try:
-			u = User(username=user_info['username'])
+			u = User(username=user_info['username'], password=user_info['password'])
 			if u is None or u.verify_password(user_info['password']) is False:
 				print("{} User query: {} failure...".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username']))
 				return False
-		except:
-			print("{} User query: {} failure...".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username']))
+			db.session.add(u)
+			db.session.commit()
+		except Exception as ex:
+			print("{} User insert: {} failure...{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username'], ex))
 			return False
 	
 		else:
-			print("{} User query: {} success...".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username']))
+			print("{} User insert: {} success...".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username']))
 			return True
+		finally:
+			db.session.close()
+
+
+@api_user.route('/userdel', endpoint='userdel')
+class UserDelApi(Resource):
+	@auth.login_required
+	def post(self):
+		user_info = request.get_json()
+		try:
+			u = User.query.filter_by(username=user_info["username"])
+			if len(list(u)) > 0:
+				db.session.delete(u[0])
+				db.session.commit()
+			else:
+				raise Exception("Has no {}".format(user_info['username']))
+		except Exception as ex:
+			print("{} User delete: {} failure...{}".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username'], ex))
+		else:
+			print(
+				"{} User delete: {} success...".format(time.strftime("%Y-%m-%d %H:%M:%S"), user_info['username']))
 		finally:
 			db.session.close()
 
