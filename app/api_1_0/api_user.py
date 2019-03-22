@@ -3,29 +3,26 @@
 # @Author  : Stevy
 import time
 from app import db
-from flask_restplus import Api, Resource, reqparse
+from flask_restplus import Api, Resource
 from flask import jsonify, request
 
 from app.api_1_0 import api_1_0
 from app.models.user import User, Role
 from app.api_1_0.api_auth import auth, generate_auth_token, verify_auth_token
-
-api_user = Api(api_1_0)
-user_parser = api_user.parser()
-user_parser.add_argument('username', location=['json', 'args'], type=str, required=False)
-user_parser.add_argument('role', location=['json', 'args'], type=str, required=False)
+from .errors import BadRequest
 
 
-@api_user.route('/userlist', endpoint='userlist')
+api = Api(api_1_0)
+
+
+@api.route('/userlist', endpoint='userlist')
 class UserListApi(Resource):
 	@auth.login_required
 	def get(self):
 		user_info = request.get_json()
-		print(user_info)
 		try:
-			args = user_parser.parse_args()
-			username_agr = args['username']
-			role_arg = args['role']
+			username_agr = user_info['username']
+			role_arg = user_info['role']
 			if username_agr is not None and role_arg is None:
 				us = User.query.filter(User.username == username_agr)
 			elif username_agr is not None and role_arg is not None:
@@ -47,11 +44,15 @@ class UserListApi(Resource):
 			db.session.close()
 
 
-@api_user.route('/useradd', endpoint='useradd')
+@api.route('/useradd', endpoint='useradd')
 class UserAddApi(Resource):
 	@auth.login_required
 	def post(self):
 		user_info = request.get_json()
+		if 'username' not in user_info:
+			raise BadRequest("用户名不能为空", 40001, {'ext': 1})
+		if 'password' not in user_info:
+			user_info['password'] = "000000"
 		try:
 			u = User(username=user_info['username'], password=user_info['password'])
 			if u is None or u.verify_password(user_info['password']) is False:
@@ -70,7 +71,7 @@ class UserAddApi(Resource):
 			db.session.close()
 
 
-@api_user.route('/userdel', endpoint='userdel')
+@api.route('/userdel', endpoint='userdel')
 class UserDelApi(Resource):
 	@auth.login_required
 	def post(self):
@@ -91,7 +92,7 @@ class UserDelApi(Resource):
 			db.session.close()
 
 
-@api_user.route('/userverify', endpoint='userverify')
+@api.route('/userverify', endpoint='userverify')
 class UserVerifyApi(Resource):
 	# 根据传过来的账号密码，返回验证结果。
 	@auth.login_required
@@ -112,7 +113,7 @@ class UserVerifyApi(Resource):
 			db.session.close()
 
 
-@api_user.route('/usertoken', endpoint='usertoken')
+@api.route('/usertoken', endpoint='usertoken')
 class UserToken(Resource):
 	# 返回一个token，默认是1个小时有限的token
 	@auth.login_required

@@ -2,23 +2,71 @@
 # _*_ coding:utf-8 _*_
 # @Author  : Stevy
 from . import api_1_0
-from flask import jsonify
+from flask import jsonify, request, json
+from werkzeug.exceptions import HTTPException
+from rks import app
 
 
-@api_1_0.app_errorhandler(404)
-def not_found(e):
-    print(e)
-    error_info = '{}'.format(e)
-    response = jsonify({'error': error_info})
-    response.status_code = 404
-    return response
+class BadRequest(Exception):
+	"""将本地错误包装成一个异常实例供抛出"""
+	def __init__(self, message, status=400, payload=None):
+		self.message = message
+		self.status = status
+		self.payload = payload
 
 
-@api_1_0.app_errorhandler(403)
-def forbidden(e):
-    print(e)
-    error_info = '{}'.format(e)
-    response = jsonify({'error': error_info})
-    response.status_code = 403
-    return response
+class ApiException(HTTPException):
+	code = 500
+	msg = 'sorry, we make a mistake'
+	error_code = 999
+	
+	def __init__(self, code=None, msg=None, error_code=None, header=None):
+		if code:
+			self.code = code
+		if msg:
+			self.msg = msg
+		if error_code:
+			self.error_code = error_code
+		super(ApiException, self).__init__(msg, None)
+	
+	def get_body(self, environ=None):
+		body = dict(
+			msg=self.msg,
+			error_code=self.error_code,
+			# 形如request="POST v1/client/register"
+			request=request.method + ' ' + self.get_url_no_param()
+		)
+		text = json.dumps(body)
+		return text
+	
+	def get_headers(self, environ=None):
+		return [('Content-Type', 'application/json')]
+	
+	@staticmethod
+	def get_url_no_param():
+		full_url = str(request.full_path)
+		main_path = full_url.split('?')
+		return main_path[0]
+
+
+@api_1_0.app_errorhandler(Exception)
+def handle_bad_request(e):
+	"""捕获 ApiExcetion、HttpException、Exception全局异常，序列化为 JSON 并返回 HTTP 400"""
+	if isinstance(e, ApiException):
+		return e
+	if isinstance(e, HTTPException):
+		code = e.code
+		msg = e.description
+		error_code = 1007
+		return ApiException(code=code, msg=msg, error_code=error_code)
+	else:
+		if not app.config['development']:
+			return ApiException()
+		raise e
+
+
+
+
+
+
 

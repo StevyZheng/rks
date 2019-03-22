@@ -3,7 +3,7 @@
 from flask_restplus import Api, Resource, reqparse
 from flask import jsonify, request
 
-from app.api_1_0.api_user import api_user as api_sys
+from app.api_1_0.api_user import api as api_sys
 from app.api_1_0.api_auth import auth, generate_auth_token, verify_auth_token
 from libs.sys import Sys
 
