@@ -49,6 +49,18 @@ class ApiException(HTTPException):
 		return main_path[0]
 
 
+class Success(ApiException):
+	code = 200
+	msg = "success"
+	error_code = 0
+
+
+class UserException(ApiException):
+	code = 201
+	msg = "用户名不可为空"
+	error_code = 50000
+
+
 @api_1_0.app_errorhandler(Exception)
 def handle_bad_request(e):
 	"""捕获 ApiExcetion、HttpException、Exception全局异常，序列化为 JSON 并返回 HTTP 400"""
@@ -60,7 +72,8 @@ def handle_bad_request(e):
 		error_code = 1007
 		return ApiException(code=code, msg=msg, error_code=error_code)
 	else:
-		if not app.config['development']:
+		from flask import current_app
+		if not current_app.config['development']:
 			return ApiException()
 		raise e
 

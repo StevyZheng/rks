@@ -10,8 +10,12 @@ from libs.sys import Sys
 
 @api_sys.route('/sysinfo', endpoint='sysinfo')
 class SysinfoApi(Resource):
+	"""
+	:param {}
+	"""
 	@auth.login_required
 	def get(self):
+		sys_param = request.get_json()
 		try:
 			return {
 				"cpu": Sys.get_cpu_info(),

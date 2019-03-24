@@ -10,6 +10,7 @@
       <w>userdel</w>
       <w>userlist</w>
       <w>usertoken</w>
+      <w>userupdate</w>
       <w>userverify</w>
     </words>
   </dictionary>
