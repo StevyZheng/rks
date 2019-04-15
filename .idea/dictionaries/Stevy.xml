@@ -2,6 +2,7 @@
   <dictionary name="Stevy">
     <words>
       <w>itsdangerous</w>
+      <w>paramiko</w>
       <w>pymysql</w>
       <w>rolename</w>
       <w>sqlalchemy</w>
