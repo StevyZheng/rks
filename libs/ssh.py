@@ -16,6 +16,6 @@ class RksParamiko:
 			self.obj.connect(self.host_ip, self.port, self.username, self.password)
 			self.obj_sftp = self.obj.open_sftp()
 		except Exception:
-			raise RksException(code=100, message=err_msg[1], args=(err_msg[1],))
+			raise RksException(code=100, message=err_msg[1])
 	
 
